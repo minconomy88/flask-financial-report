@@ -1,11 +1,11 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_from_directory
 import pandas as pd
 import requests
 import os
 
 app = Flask(__name__)
 API_KEY = '8ba3665e7adee12177138abb35dce39e4a10673e'
-CORP_CODES_JSON_URL = 'https://github.com/minconomy88/dart-corp-codes/blob/main/corp_codes_all.json'
+CORP_CODES_JSON_URL = 'https://raw.githubusercontent.com/minconomy88/dart-corp-codes/main/corp_codes_all.json'
 
 # 기업명으로 corp_code 찾기
 def get_corp_code(corp_name):
@@ -55,12 +55,20 @@ def generate_report():
 
     df = pd.DataFrame(all_data)
     os.makedirs('reports', exist_ok=True)
-    filename = f'reports/{corp_name}_report.xlsx'
-    df.to_excel(filename, index=False)
+    filename = f'{corp_name}_report.xlsx'
+    filepath = os.path.join('reports', filename)
+    df.to_excel(filepath, index=False)
 
     return jsonify({
-        'download_url': f'https://yourdomain.com/reports/{corp_name}_report.xlsx'
+        'download_url': f'https://flask-financial-report.onrender.com/reports/{filename}'
     })
 
+# 리포트 다운로드용 엔드포인트
+@app.route('/reports/<path:filename>')
+def download_report(filename):
+    return send_from_directory('reports', filename)
+
+# Render 호환용 포트 지정
 if __name__ == '__main__':
-    app.run(debug=True, port=5000)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host='0.0.0.0', port=port)
