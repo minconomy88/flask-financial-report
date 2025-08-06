@@ -154,7 +154,7 @@ def generate_report():
     df.to_excel(filename, index=False)
 
     return jsonify({
-        'download_url': f'https://yourdomain.com/reports/{corp_name}_report.xlsx'
+        'download_url': f'https://flask-financial-report.onrender.com/{corp_name}_report.xlsx'
     })
 
 import os
